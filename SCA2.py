@@ -17,7 +17,6 @@ import copy
 from scipy import stats
 import sys
 import networkx as nx
-import pylab as pl
 import time
 from collections import Counter
 import newrb
@@ -110,7 +109,6 @@ def PSOClusteringAlgorithm(datapoints, dataname, run):
 
     T = 100  # total time steps
     vmax = [0.0 for i in range(len(datapoints[0]))]
-    vmin = [0.0 for i in range(len(datapoints[0]))]
     axis_range = [[0.0, 0.0] for i in range(len(datapoints[0]))]
 
     c1 = 1.0  # acceleration constant for cognitive learning
@@ -191,11 +189,11 @@ def PSOClusteringAlgorithm(datapoints, dataname, run):
                 # update velocity
                 velocity[i][j] = w[i]*velocity[i][j] + c1 * r1 * (pbest_Mat[i][j]) + c2 * r2 * (lbest_Mat[i][j])
                 # velocity clamped
-                v = vmax[j] - vmin[j]
-                if velocity[i][j] > v:
-                    velocity[i][j] = v
-                elif velocity[i][j] < -v:
-                    velocity[i][j] = -v
+                # v = vmax[j] - vmin[j]
+                if velocity[i][j] > vmax[j]:
+                    velocity[i][j] = vmax[j]
+                elif velocity[i][j] < -vmax[j]:
+                    velocity[i][j] = -vmax[j]
                 X[i][j] = X[i][j] + velocity[i][j]  # calculate trial position
             # use RBFnn to estimate the density of the trail position
             new_density = net(X[i].reshape((1, d)))
@@ -262,9 +260,12 @@ if __name__ == "__main__":
                   "data/D31.txt": 48, "data/dim512.txt": 2, "data/iris.txt": 5, "data/wdbc.txt": 38,
                   "data/seeds.txt": 16, "data/segmentation_all.txt": 2, "data/ecoli.txt": 22,
                   "data/appendicitis.txt": 11}
-    num_para = {"data/aggregation.txt": 7, "data/flame.txt": 2, "data/DS850.txt": 5, "data/R15.txt": 15,
-                "data/D31.txt": 31, "data/dim512.txt": 16, "data/iris.txt": 3, "data/wdbc.txt": 2, "data/seeds.txt": 3,
-                "data/segmentation_all.txt": 7, "data/ecoli.txt": 8, "data/appendicitis.txt": 2}
+    kmeans_num = {"data/aggregation.txt": 6, "data/flame.txt": 4, "data/DS850.txt": 5, "data/R15.txt": 10,
+                  "data/D31.txt": 7, "data/dim512.txt": 16, "data/iris.txt": 3, "data/wdbc.txt": 2, "data/seeds.txt": 3,
+                  "data/segmentation_all.txt": 4, "data/ecoli.txt": 5, "data/appendicitis.txt": 5}
+    hac_num = {"data/aggregation.txt": 6, "data/flame.txt": 4, "data/DS850.txt": 5, "data/R15.txt": 15,
+               "data/D31.txt": 31, "data/dim512.txt": 16, "data/iris.txt": 3, "data/wdbc.txt": 2, "data/seeds.txt": 3,
+               "data/segmentation_all.txt": 4, "data/ecoli.txt": 8, "data/appendicitis.txt": 7}
     optics_radius = {"data/aggregation.txt": 1.40, "data/flame.txt": 1.3, "data/DS850.txt": 0.4, "data/R15.txt": 0.55,
                      "data/D31.txt": 0.95, "data/dim512.txt": 0.36, "data/iris.txt": 0.12, "data/wdbc.txt": 0.49,
                      "data/seeds.txt": 0.24, "data/segmentation_all.txt": 0.15, "data/ecoli.txt": 0.26,
@@ -312,12 +313,12 @@ if __name__ == "__main__":
         elif choice == "3":
             print("This is the %d run" % (i + 1))
             start = time.time()
-            points_labels, k = Algorithms.kmeans(num_para[filename], datapoints, i)  # k-means
+            points_labels, k = Algorithms.kmeans(kmeans_num[filename], datapoints, i)  # k-means
             end = time.time()
             whole_time += end-start
         elif choice == "4":
             start = time.time()
-            points_labels, k = Algorithms.agglomerativeClustering(num_para[filename], datapoints)  # HAC
+            points_labels, k = Algorithms.agglomerativeClustering(hac_num[filename], datapoints)  # HAC
             end = time.time()
             whole_time += end-start
         elif choice == "5":
